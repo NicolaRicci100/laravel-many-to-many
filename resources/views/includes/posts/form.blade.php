@@ -51,6 +51,16 @@
         <img src="{{ old('image', $post->image ?? 'https://marcolanci.it/utils/placeholder.jpg') }}" alt="preview"
             class="img-fluid" id="image-preview">
     </div>
+    <div class="col-12">
+        @foreach ($technologies as $technology)
+            <div class="form-check form-check-inline my-2">
+                <input class="form-check-input" type="checkbox" @if (in_array($technology->id, old('technologies', $post_technology_ids ?? []))) checked @endif
+                    id="technology-{{ $technology->id }}" value="{{ $technology->id }}" name="technologies[]">
+                <label class="form-check-label"
+                    for="technology-{{ $technology->id }}">{{ $technology->label }}</label>
+            </div>
+        @endforeach
+    </div>
 </div>
 <hr>
 <div class="d-flex justify-content-end mt-4">

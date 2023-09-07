@@ -3,8 +3,16 @@
 @section('title', 'Post')
 
 @section('content')
-    <header>
+    <header class="d-flex align-items-baseline justify-content-between">
         <h1>{{ $post->title }}</h1>
+        <div>
+            @forelse ($post->technologies as $technology)
+                <span class="badge rounded-pill text-bg-{{ $technology->color }}">{{ $technology->label }}</span>
+
+            @empty
+                -
+            @endforelse
+        </div>
     </header>
     <hr>
     <div class="clearfix">

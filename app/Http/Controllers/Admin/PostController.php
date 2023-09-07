@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Support\Str;
 use GrahamCampbell\ResultType\Success;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -29,7 +31,8 @@ class PostController extends Controller
     {
         $post = new Post();
         $types = Type::select('id', 'label')->get();
-        return view('admin.posts.create', compact('post', 'types'));
+        $technologies = Technology::select('id', 'label')->get();
+        return view('admin.posts.create', compact('post', 'types', 'technologies'));
     }
 
     /**
@@ -42,7 +45,8 @@ class PostController extends Controller
                 'title' => 'required|string|max:50|unique:posts',
                 'content' => 'required|string',
                 'image' => 'nullable|url',
-                'type_id' => 'nullable|exists:types,id'
+                'type_id' => 'nullable|exists:types,id',
+                'technologies' => 'nullable|exists:technologies,id'
             ],
             [
                 'title.required' => 'Il titolo è obbligatorio',
@@ -50,7 +54,8 @@ class PostController extends Controller
                 'title.unique' => "Esiste già un post dal titolo $request->title",
                 'content.required' => 'Non può esistere un post senza contenuto',
                 'image.url' => "L'url inserito non è valido",
-                'type_id.exists' => 'Tipologia inesistente'
+                'type_id.exists' => 'Tipologia inesistente',
+                'technologies.exists' => 'Le tecnologie selezionate non sono valide'
             ]
         );
 
@@ -65,6 +70,9 @@ class PostController extends Controller
         $post->fill($data);
         $post->slug = Str::slug($post->title, '-');
         $post->save();
+
+        if (Arr::exists($data, 'technologies')) $post->technologies()->attach($data['technologies']);
+
         return to_route('admin.posts.show', $post)->with('type', 'success')->with('message', 'Post aggiunto');
     }
 
@@ -82,7 +90,9 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $types = Type::select('id', 'label')->get();
-        return view('admin.posts.edit', compact('post', 'types'));
+        $technologies = Technology::select('id', 'label')->get();
+        $post_technology_ids = $post->technologies->pluck('id')->toArray();
+        return view('admin.posts.edit', compact('post', 'types', 'technologies', 'post_technology_ids'));
     }
 
     /**
@@ -95,7 +105,8 @@ class PostController extends Controller
                 'title' => ['required', 'string', 'max:50', Rule::unique('posts')->ignore($post->id)],
                 'content' => 'required|string',
                 'image' => 'nullable|url',
-                'type_id' => 'nullable|exists:types,id'
+                'type_id' => 'nullable|exists:types,id',
+                'technologies' => 'nullable|exists:technologies,id'
             ],
             [
                 'title.required' => 'Il titolo è obbligatorio',
@@ -103,7 +114,8 @@ class PostController extends Controller
                 'title.unique' => "Esiste già un post dal titolo $request->title",
                 'content.required' => 'Non può esistere un post senza contenuto',
                 'image.url' => "L'url inserito non è valido",
-                'type_id.exists' => 'Tipologia inesistente'
+                'type_id.exists' => 'Tipologia inesistente',
+                'technologies.exists' => 'Le tecnologie selezionate non sono valide'
             ]
         );
 
@@ -117,6 +129,9 @@ class PostController extends Controller
         // }
 
         $post->update($data);
+
+        if (!Arr::exists($data, 'technologies') && count($post->technologies)) $post->technologies()->detach();
+        elseif (Arr::exists($data, 'technologies')) $post->technologies()->sync($data['technologies']);
 
         return to_route('admin.posts.show', $post)->with('type', 'success')->with('message', 'Post modificato con successo');
     }
