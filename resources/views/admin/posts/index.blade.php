@@ -13,6 +13,7 @@
                 <th scope="col">Title</th>
                 <th scope="col">Slug</th>
                 <th scope="col">Tipologia</th>
+                <th scope="col">Tecnologia</th>
                 <th scope="col">Creato il</th>
                 <th scope="col">Ultima modifica</th>
                 <th></th>
@@ -26,6 +27,15 @@
                     <td>{{ $post->title }}</td>
                     <td>{{ $post->slug }}</td>
                     <td>{{ $post->type?->label }}</td>
+                    <td>
+                        @forelse ($post->technologies as $technology)
+                            <span
+                                class="badge rounded-pill text-bg-{{ $technology->color }}">{{ $technology->label }}</span>
+
+                        @empty
+                            -
+                        @endforelse
+                    </td>
                     <td>{{ $post->created_at }}</td>
                     <td>{{ $post->updated_at }}</td>
                     <td>
@@ -49,7 +59,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td class="text-center" colspan="6">
+                    <td class="text-center" colspan="7">
                         <h3>Non ci sono post</h3>
                     </td>
                 </tr>
