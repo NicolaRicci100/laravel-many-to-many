@@ -13,7 +13,7 @@
                 <th scope="col">Title</th>
                 <th scope="col">Slug</th>
                 <th scope="col">Tipologia</th>
-                <th scope="col">Tecnologia</th>
+                <th scope="col">Tecnologie</th>
                 <th scope="col">Creato il</th>
                 <th scope="col">Ultima modifica</th>
                 <th></th>
